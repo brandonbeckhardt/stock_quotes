@@ -4,7 +4,7 @@ import requests
 import pprint
 # from airtable-python-wrapper import Airtable
 from airtable import Airtable
-import unirest
+from datetime import date
 
 apiKey="60BSELJ4STUEN8NZ"
 pp = pprint.PrettyPrinter(indent=4)
@@ -31,11 +31,15 @@ def main():
 	         "Authorization":"Bearer fr0EicWidzcRf3RAPzCmGNQJKezf"
 	 	 	}
 		)
-		quoteInfo=r.json()['quotes']['quote']
-		recentAskPrice = quoteInfo['ask']
-		recordId=holding['id']
-		print("Symbol: " + symbol + " - Ask Price: " + str(recentAskPrice))
-		fields={'Most Recent Price': recentAskPrice}
-		airtable.update(recordId, fields)
+		if 'quote' in r.json()['quotes']:
+			# print(r.json())
+			quoteInfo=r.json()['quotes']['quote']
+			recentAskPrice = quoteInfo['ask']
+			recordId=holding['id']
+			print(symbol + " - " + str(recentAskPrice))
+			fields={'Most Recent Price': recentAskPrice, 'Most Recent Price Update Date':date.today().strftime("%B %d, %Y") }
+			airtable.update(recordId, fields)
+		else:
+			print("Unable to get quote for " + symbol)
 	return
 main()
