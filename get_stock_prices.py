@@ -66,9 +66,13 @@ def getCryptoInfo(holding, symbol, airtable, assetIdData, usdCryptoId):
    					"Content-Type": "application/json"
 	 				}
 			)
-			recentPrice = r.json()['payload']['medianPrice']
-			print(symbol + " - " + str(recentPrice))
-			updateAirtableMostRecentPrice(airtable, holding, recentPrice)
+			if 'payload' in r.json():
+				recentPrice = r.json()['payload']['weightedAveragePrice']
+				print(symbol + " - " + str(recentPrice))
+				updateAirtableMostRecentPrice(airtable, holding, recentPrice)
+			else:
+				print("Could not find payload for " + symbol)
+				print(r.json())
 
 def updateAirtableMostRecentPrice(airtable, holding, recentPrice):
 	recordId=holding['id']
