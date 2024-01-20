@@ -12,9 +12,12 @@ pp = pprint.PrettyPrinter(indent=4)
 
 
 def main():
-	airtable = Airtable('appLWRsE1SsJOsoOP', 'Current Holdings',api_key='keyOFzjy926o6Hx04')
-	airtable.get_all()
-	holdings = airtable.get_all(formula="Symbol")
+	airtable = Airtable('appLWRsE1SsJOsoOP', 'patrbEJ15TfKSNTnV.967e25a5f15e776d9df8865a0d6724ba4e172d029a71f7bc43d7a8125fd05a51')
+	airtable.get('Current Holdings')
+	# airtable.get_all()
+	# holdings = airtable.get_all(formula="Symbol")
+	holdings = airtable.get('Current Holdings')['records']
+	print(holdings)
 
 	assetIdData={}
 	with open('cryptoApiAssets.txt') as json_file:
@@ -27,16 +30,17 @@ def main():
 
 
 	for holding in holdings:
-		symbol = holding['fields']['Symbol'][0]
-		assetTypeExists=True
-		if symbol!='USD':
-			if 'Asset Type' not in holding['fields']:
-				print("No asset type for " + symbol)
-				assetTypeExists=False
-			if assetTypeExists==False or "Crypto" not in holding['fields']['Asset Type'][0]:
-				getNonCryptoInfo(holding, symbol, airtable)
-			else:
-				getCryptoInfo(holding, symbol, airtable, assetIdData, usdCryptoId)
+		if 'Symbol' in holding['fields']:
+			symbol = holding['fields']['Symbol'][0]
+			assetTypeExists=True
+			if symbol!='USD':
+				if 'Asset Type' not in holding['fields']:
+					print("No asset type for " + symbol)
+					assetTypeExists=False
+				if assetTypeExists==False or "Crypto" not in holding['fields']['Asset Type'][0]:
+					getNonCryptoInfo(holding, symbol, airtable)
+				else:
+					getCryptoInfo(holding, symbol, airtable, assetIdData, usdCryptoId)
 	return
 
 def getNonCryptoInfo(holding, symbol, airtable):
@@ -77,6 +81,6 @@ def getCryptoInfo(holding, symbol, airtable, assetIdData, usdCryptoId):
 def updateAirtableMostRecentPrice(airtable, holding, recentPrice):
 	recordId=holding['id']
 	fields={'Most Recent Price': recentPrice, 'Most Recent Price Update Date':date.today().strftime("%B %d, %Y") }
-	airtable.update(recordId, fields)
+	airtable.update('Current Holdings',recordId, fields)
 
 main()
